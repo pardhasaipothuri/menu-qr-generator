@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Generator Engine</title>
-    <!-- Load the official production QR code engine -->
+    <!-- Fixed Production CDN Link for the QR Generation Matrix Library -->
     <script src="https://jsdelivr.net"></script>
     <style>
         body {
@@ -25,7 +25,6 @@
             text-align: center;
             max-width: 450px;
         }
-        /* The Quiet Zone wrapper: essential for fast camera recognition */
         .qr-wrapper {
             background: #ffffff;
             padding: 20px;
@@ -62,7 +61,6 @@
     <p style="color: #6e6e73; font-size: 14px;">The logo is flattened directly into the matrix blocks with Level H protection for instant scans.</p>
     
     <div class="qr-wrapper">
-        <!-- Everything is processed directly onto this single canvas -->
         <canvas id="qr-canvas"></canvas>
     </div>
     <br>
@@ -83,13 +81,13 @@
         qr.make();
 
         const moduleCount = qr.getModuleCount();
-        const cellSize = 12; // Controls visual resolution sharpness for print
+        const cellSize = 12; // Controls sharpness resolution for print formatting
         const canvasSize = moduleCount * cellSize;
         
         canvas.width = canvasSize;
         canvas.height = canvasSize;
 
-        // 2. Clear canvas to clean crisp White
+        // 2. Clear canvas to pure crisp White
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvasSize, canvasSize);
 
@@ -108,16 +106,14 @@
         logoImg.src = 'logo.png'; // Looks for logo.png in the root of this repo
         
         logoImg.onload = function() {
-            // Keep logo footprint strictly capped under 20% width to protect QR parity bits
-            const logoSize = canvasSize * 0.18; 
+            const logoSize = canvasSize * 0.18; // Constrain logo width footprint to preserve error parity bits
             const centerPos = (canvasSize - logoSize) / 2;
 
             // Step A: Burn a white square shield behind the logo so dark pixels don't bleed through
             ctx.fillStyle = '#ffffff';
-            // Give it a thin border frame buffer (4px padding)
             ctx.fillRect(centerPos - 4, centerPos - 4, logoSize + 8, logoSize + 8);
 
-            // Step B: Flatten the logo image permanently onto the canvas surface
+            // Step B: Flatten the logo image permanently onto the canvas matrix array
             ctx.drawImage(logoImg, centerPos, centerPos, logoSize, logoSize);
         };
         
@@ -130,7 +126,6 @@
         const canvas = document.getElementById('qr-canvas');
         if (!canvas) return;
 
-        // Trigger safe file delivery from browser cache
         const link = document.createElement('a');
         link.download = 'menu_poster_qr_linked.png';
         link.href = canvas.toDataURL('image/png');
