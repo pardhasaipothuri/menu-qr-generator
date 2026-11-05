@@ -81,8 +81,9 @@
         qr.make();
 
         const moduleCount = qr.getModuleCount();
-        const cellSize = 12; // High-res cell sizing for crisp poster printing
-        const canvasSize = moduleCount * cellSize;
+        const cellSize = 12;
+        const quietZone = 4;
+        const canvasSize = (moduleCount + quietZone * 2) * cellSize;
         
         canvas.width = canvasSize;
         canvas.height = canvasSize;
@@ -96,7 +97,12 @@
         for (let row = 0; row < moduleCount; row++) {
             for (let col = 0; col < moduleCount; col++) {
                 if (qr.isDark(row, col)) {
-                    ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+                    ctx.fillRect(
+                       (col + quietZone) * cellSize,
+                       (row + quietZone) * cellSize,
+                        cellSize,
+                        cellSize
+                     );
                 }
             }
         }
