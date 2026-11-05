@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Generator Engine</title>
-    <!-- Load the high-performance QR generation script -->
-    <script src="https://cloudflare.com"></script>
+    <!-- Load the official production QR code engine -->
+    <script src="https://jsdelivr.net"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -19,128 +19,126 @@
         }
         .container {
             background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
             text-align: center;
+            max-width: 450px;
         }
-        /* Critical for scanning: Pure white background wrapper acting as the Quiet Zone */
+        /* The Quiet Zone wrapper: essential for fast camera recognition */
         .qr-wrapper {
-            position: relative;
             background: #ffffff;
-            padding: 16px;
-            border-radius: 8px;
+            padding: 20px;
+            border-radius: 12px;
             display: inline-block;
-            margin-top: 20px;
+            margin: 25px 0;
+            box-shadow: inset 0 0 0 1px #e5e5e7;
         }
         canvas {
             display: block;
-        }
-        .logo-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 18%; /* Constrained to protect scannability blocks */
-            height: 18%;
-            object-fit: contain;
-            background: white; /* Pads the logo so background blocks don't bleed through */
-            padding: 2px;
-            border-radius: 4px;
+            max-width: 100%;
+            height: auto;
         }
         .btn {
-            margin-top: 20px;
-            padding: 10px 20px;
+            padding: 12px 24px;
             background: #0071e3;
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #0077ed;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Your Custom Menu QR Code</h2>
-    <p>Right-click the image to save, or use the download button.</p>
+    <h2>Your Core QR Engine</h2>
+    <p style="color: #6e6e73; font-size: 14px;">The logo is flattened directly into the matrix blocks with Level H protection for instant scans.</p>
     
-    <div class="qr-wrapper" id="qr-container">
-        <!-- The QR script will draw the canvas right here -->
-        <img id="logo-element" src="logo.png" class="logo-overlay" alt="Logo">
+    <div class="qr-wrapper">
+        <!-- Everything is processed directly onto this single canvas -->
+        <canvas id="qr-canvas"></canvas>
     </div>
     <br>
-    <button class="btn" onclick="downloadQR()">Download High-Res PNG</button>
+    <button class="btn" onclick="downloadQR()">Download Poster-Ready PNG</button>
 </div>
 
 <script>
-    // 🔗 LINKING THEM AT LAST: Paste your live Cloudflare Pages URL here!
+    // 🔗 LINKING THEM AT LAST: Replace this link with your live Cloudflare Pages URL!
     const MY_LIVE_MENU_URL = "https://pages.dev"; 
 
-    function generateQR() {
-        // Create QR code with Type 0 (Auto-detect size) and Level H Error Correction
+    function generateQRWithLogo() {
+        const canvas = document.getElementById('qr-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 1. Configure the matrix: Type 0 (Auto size), Level H (30% obstruction ceiling)
         const qr = qrcode(0, 'H');
         qr.addData(MY_LIVE_MENU_URL);
         qr.make();
 
-        // Create a canvas element to render high-contrast black and white pixels
-        const container = document.getElementById('qr-container');
-        const cellSize = 12; // High cell size ensures a crisp image for your poster
-        const margin = 0;
+        const moduleCount = qr.getModuleCount();
+        const cellSize = 12; // Controls visual resolution sharpness for print
+        const canvasSize = moduleCount * cellSize;
         
-        // Generate raw HTML table modules and convert to a clean canvas drawing
-        const qrImageTag = qr.createImgTag(cellSize, margin);
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = qrImageTag;
-        const imgEl = tempDiv.querySelector('img');
+        canvas.width = canvasSize;
+        canvas.height = canvasSize;
 
-        imgEl.onload = function() {
-            const canvas = document.createElement('canvas');
-            canvas.id = 'qr-canvas';
-            canvas.width = imgEl.width;
-            canvas.height = imgEl.height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(imgEl, 0, 0);
-            
-            // Insert the canvas into the wrapper right behind the centered logo image
-            container.insertBefore(canvas, document.getElementById('logo-element'));
+        // 2. Clear canvas to clean crisp White
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvasSize, canvasSize);
+
+        // 3. Draw raw black data modules
+        ctx.fillStyle = '#000000';
+        for (let row = 0; row < moduleCount; row++) {
+            for (let col = 0; col < moduleCount; col++) {
+                if (qr.isDark(row, col)) {
+                    ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+                }
+            }
+        }
+
+        // 4. Load, calculate and burn the logo asset in the middle
+        const logoImg = new Image();
+        logoImg.src = 'logo.png'; // Looks for logo.png in the root of this repo
+        
+        logoImg.onload = function() {
+            // Keep logo footprint strictly capped under 20% width to protect QR parity bits
+            const logoSize = canvasSize * 0.18; 
+            const centerPos = (canvasSize - logoSize) / 2;
+
+            // Step A: Burn a white square shield behind the logo so dark pixels don't bleed through
+            ctx.fillStyle = '#ffffff';
+            // Give it a thin border frame buffer (4px padding)
+            ctx.fillRect(centerPos - 4, centerPos - 4, logoSize + 8, logoSize + 8);
+
+            // Step B: Flatten the logo image permanently onto the canvas surface
+            ctx.drawImage(logoImg, centerPos, centerPos, logoSize, logoSize);
+        };
+        
+        logoImg.onerror = function() {
+            console.warn("Logo asset 'logo.png' could not be found. Serving generic optimized matrix instead.");
         };
     }
 
     function downloadQR() {
         const canvas = document.getElementById('qr-canvas');
         if (!canvas) return;
-        
-        // Create a temporary master canvas to flatten the QR blocks + Logo together
-        const masterCanvas = document.createElement('canvas');
-        masterCanvas.width = canvas.width;
-        masterCanvas.height = canvas.height;
-        const ctx = masterCanvas.getContext('2d');
-        
-        // 1. Draw the QR base
-        ctx.drawImage(canvas, 0, 0);
-        
-        // 2. Bake the logo into the center of the downloaded file
-        const logo = document.getElementById('logo-element');
-        const logoSize = canvas.width * 0.18;
-        const pos = (canvas.width - logoSize) / 2;
-        
-        // Draw white backing box under logo
-        ctx.fillStyle = "white";
-        ctx.fillRect(pos - 2, pos - 2, logoSize + 4, logoSize + 4);
-        // Draw the logo itself
-        ctx.drawImage(logo, pos, pos, logoSize, logoSize);
 
-        // Trigger automatic download
+        // Trigger safe file delivery from browser cache
         const link = document.createElement('a');
-        link.download = 'final_poster_menu_qr.png';
-        link.href = masterCanvas.toDataURL('image/png');
+        link.download = 'menu_poster_qr_linked.png';
+        link.href = canvas.toDataURL('image/png');
         link.click();
     }
 
-    // Run on boot
-    window.onload = generateQR;
+    // Run layout render process on page startup
+    window.onload = generateQRWithLogo;
 </script>
 
 </body>
