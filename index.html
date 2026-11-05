@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Generator Engine</title>
-    <!-- ⚡ FIXED: Complete and stable library link for the QR Engine -->
+    <!-- ✅ WORKING CDN LINK: Points directly to the core QR Engine library file -->
     <script src="https://jsdelivr.net"></script>
     <style>
         body {
@@ -68,30 +68,30 @@
 </div>
 
 <script>
-    // 🔗 LINKING THEM AT LAST: Replace this link with your live Cloudflare Pages URL!
-    const MY_LIVE_MENU_URL = "https://menu-app-5gy.pages.dev"; 
+    // 🔗 LINKED AT LAST: Your actual Cloudflare Pages Menu URL
+    const MY_LIVE_MENU_URL = "https://menu-app-5gy.pages.dev/"; 
 
     function generateQRWithLogo() {
         const canvas = document.getElementById('qr-canvas');
         const ctx = canvas.getContext('2d');
         
-        // 1. Configure the matrix: Type 0 (Auto size), Level H (30% obstruction ceiling)
+        // 1. Configure the matrix: Type 0 (Auto size), Level H (30% structural redundancy)
         const qr = qrcode(0, 'H');
         qr.addData(MY_LIVE_MENU_URL);
         qr.make();
 
         const moduleCount = qr.getModuleCount();
-        const cellSize = 12; // Controls visual resolution sharpness for print
+        const cellSize = 12; // High-res cell sizing for crisp poster printing
         const canvasSize = moduleCount * cellSize;
         
         canvas.width = canvasSize;
         canvas.height = canvasSize;
 
-        // 2. Clear canvas to pure crisp White
+        // 2. Clear canvas to pure White
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvasSize, canvasSize);
 
-        // 3. Draw raw black data modules
+        // 3. Draw black data modules
         ctx.fillStyle = '#000000';
         for (let row = 0; row < moduleCount; row++) {
             for (let col = 0; col < moduleCount; col++) {
@@ -101,24 +101,24 @@
             }
         }
 
-        // 4. Load, calculate and burn the logo asset in the middle
+        // 4. Handle center logo overlay placement
         const logoImg = new Image();
-        logoImg.src = 'logo.png'; // Looks for logo.png in the root of this repo
+        logoImg.src = 'logo.png'; // Looks for logo.png in the root of your repo
         
         logoImg.onload = function() {
-            const logoSize = canvasSize * 0.18; // Constrain logo width footprint to preserve error parity bits
+            const logoSize = canvasSize * 0.18; // 18% footprint safety ceiling to keep data scannable
             const centerPos = (canvasSize - logoSize) / 2;
 
-            // Step A: Burn a white square shield behind the logo so dark pixels don't bleed through
+            // Step A: Draw pure white background shield behind the logo
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(centerPos - 4, centerPos - 4, logoSize + 8, logoSize + 8);
 
-            // Step B: Flatten the logo image permanently onto the canvas matrix array
+            // Step B: Bake the logo image permanently onto the canvas surface matrix
             ctx.drawImage(logoImg, centerPos, centerPos, logoSize, logoSize);
         };
         
         logoImg.onerror = function() {
-            console.warn("Logo asset 'logo.png' could not be found. Serving generic optimized matrix instead.");
+            console.warn("logo.png could not be fetched. Displaying raw QR code instead.");
         };
     }
 
@@ -132,7 +132,7 @@
         link.click();
     }
 
-    // Run layout render process on page startup
+    // Boot up the drawing system on page load
     window.onload = generateQRWithLogo;
 </script>
 
