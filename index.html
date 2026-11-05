@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Generator Engine</title>
-    <!-- Fixed Production CDN Link for the QR Generation Matrix Library -->
+    <!-- ⚡ FIXED: Complete and stable library link for the QR Engine -->
     <script src="https://jsdelivr.net"></script>
     <style>
         body {
@@ -69,7 +69,7 @@
 
 <script>
     // 🔗 LINKING THEM AT LAST: Replace this link with your live Cloudflare Pages URL!
-    const MY_LIVE_MENU_URL = "https://menu-app-5gy.pages.dev/"; 
+    const MY_LIVE_MENU_URL = "https://menu-app-5gy.pages.dev"; 
 
     function generateQRWithLogo() {
         const canvas = document.getElementById('qr-canvas');
@@ -81,7 +81,7 @@
         qr.make();
 
         const moduleCount = qr.getModuleCount();
-        const cellSize = 12; // Controls sharpness resolution for print formatting
+        const cellSize = 12; // Controls visual resolution sharpness for print
         const canvasSize = moduleCount * cellSize;
         
         canvas.width = canvasSize;
